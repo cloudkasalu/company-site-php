@@ -1,2 +1,3 @@
 docker-compose.yml
 PHP.Dockerfile
+nginx.conf
