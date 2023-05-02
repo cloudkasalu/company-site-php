@@ -51,13 +51,13 @@ class EntryPoint{
                     $action = "home";
                 }
                 $controller = new \controllers\AdminController($pdo);
-                $page = $controller->$action();
+                $page = $controller->$action($url_request);
 
             }else{
 
-
+                $api = array_shift($url_request);
                 $controller = new VisitorController($pdo);
-                $page = $controller->$route();
+                $page = $controller->$route($api);
                 
             }
 
@@ -74,7 +74,15 @@ class EntryPoint{
 
         $url_request = explode('/', $url);
         $route = array_shift($url_request);
-        $route == "dashboard" ? include __DIR__ . '/../templates/admin/layout.php' : include __DIR__ . '/../templates/visitor/layout.php';
+
+        if($route === "dashboard"){
+            include __DIR__ . '/../templates/admin/layout.php';
+        }else if($route === "login" || $route === "error"){
+            include __DIR__ . '/../templates/blank_layout.php';
+        }else{
+            include __DIR__ . '/../templates/visitor/layout.php';
+        }
+
 
     }
 }

@@ -14,13 +14,15 @@
             </div>
         </div>
     </header>
+    <?php foreach ($aboutSection as $content) :?>
+        <?php if(isset($content['title'])) { ?>
     <section id="aboutSection">
         <div class="container">
             <div class="section-wrapper">
                 <div class="wrapper-image" id="aboutImage">
                     <div class="image-container">
                         <img
-                             src="images/image10.webp" 
+                        <?php echo 'src="data:image/webp;base64,'.base64_encode($content['image']).'"';?>
                              alt="diverse people looking at laptop screen" width="555" height="398"
                              loading="lazy"
                              >
@@ -30,19 +32,16 @@
                     <div class="sub-heading">
                         <h4>\ About us \</h4>
                     </div>
-                    <h2>One Of The Fastest Way To Business Growth</h2>
-                    <p>It is a long established fact that a reader will be distracted by the 
-                        readable content of a page when looking at its layout. The point of 
-                        using Lorem Ipsum is that it has a more-or-less normal distribution 
-                        of letters, as opposed</p>
+                    <h2> <?= htmlspecialchars($content['title'],  ENT_QUOTES, 'UTF-8')?></h2>
+                    <p><?=$content['paragraph']?></p>
                     <div class="bottom-tag">
                         <div class="d-flex">
                             <div class="icon flex-item">
-                                <img src="images/customer_care_icon.svg" alt="customer care icon" loading="lazy">
+                                <img src="../images/customer_care_icon.svg" alt="customer care icon" loading="lazy">
                             </div>
                             <div class="flex-item">
-                                <h5>Get Instant Professional Advice</h5>
-                                <p>Ready to Help: <span class="secondary-color">+1 356 678 7897</span></p>
+                                <h5><?=$content['contact_title']?></h5>
+                                <p>Ready to Help: <span class="secondary-color"><?=$content['contact_details']?></span></p>
                             </div>
                         </div>
                     </div>
@@ -50,6 +49,8 @@
             </div>
         </div>
     </section>
+    <?php }?>
+    <?php endforeach;?>
     <section id="planningSection">
         <div class="container">
             <div class="center section-heading">
@@ -265,50 +266,24 @@
                 <h2>Our Leaders</h2>
             </div>
             <div class="team-members">
+            <?php foreach($teamSection as $content):?>
+                    <?php if(isset($content['member_name'])) {?>
                 <div class="team-member">
                     <div class="member-image">
                         <div class="image-container">
-                            <img src="images/CEO.webp" alt="company ceo" width="268" height="300" loading="lazy">
+                            <img 
+                            <?php echo 'src="data:image/webp;base64,'.base64_encode($content['profile_image']).'"';?>
+                             alt="<?= htmlspecialchars($content['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>" 
+                             width="268" height="300" loading="lazy">
                         </div>
                     </div>
                     <div class="member-details center">
-                        <h5 class="secondary-color name">Larry F. Burnett</h5>
-                        <span class="position">CEO</span>
+                        <h5 class="secondary-color name"><?= htmlspecialchars($content['member_name'], ENT_QUOTES, 'UTF-8')?></h5>
+                        <span class="position"><?= htmlspecialchars($content['member_position'], ENT_QUOTES, 'UTF-8')?></span>
                     </div>
                 </div>
-                <div class="team-member">
-                    <div class="member-image">
-                        <div class="image-container">
-                            <img src="images/CTO.webp" alt="company cto" width="268" height="300" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="member-details center">
-                        <h5 class="secondary-color name">Meghan J. Webb</h5>
-                        <span class="position">CTO</span>
-                    </div>
-                </div>
-                <div class="team-member">
-                    <div class="member-image">
-                        <div class="image-container">
-                            <img src="images/CFO.webp" alt="company cfo" width="268" height="300" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="member-details center">
-                        <h5 class="secondary-color name">Yvonne J. Cullum</h5>
-                        <span class="position">CFO</span>
-                    </div>
-                </div>
-                <div class="team-member">
-                    <div class="member-image">
-                        <div class="image-container">
-                            <img src="images/COO.webp" alt="company coo" width="268" height="300" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="member-details center">
-                        <h5 class="secondary-color name">Diana H. Williams</h5>
-                        <span class="position">COO</span>
-                    </div>
-                </div>
+                <?php }?>
+                <?php endforeach;?>
             </div>
         </div>
     </section>

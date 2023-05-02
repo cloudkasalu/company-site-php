@@ -13,7 +13,7 @@
     <main id="dashboard">
         <aside>
             <div class="dashboard-brand">
-                <img src="images/dashboard_logo.svg" alt="logo">
+                <img src="/images/dashboard_logo.svg" alt="logo">
             </div>
             <nav>
                 <ul class="dashboard-nav-list">
@@ -23,22 +23,21 @@
                         <ul class="pages-list">
                             <li>About
                                 <ul>
-                                    <li><a href="dashboard/about">about us</a></li>
-                                    <li>team section</li>
+                                    <li><a href="<?= ROOT . '/dashboard/about/section'?>">about us</a></li>
+                                    <li><a href="<?= ROOT . '/dashboard/about/team'?>">team</a></li>
                                 </ul>
                             </li>
                             <li>Services
                                 <ul>
-                                    <li>section one</li>
-                                    <li>section two</li>
+                                    <li><a href="<?= ROOT . '/dashboard/services/section'?>">vision</a></li>
+                                    <li><a href="<?= ROOT . '/dashboard/services/list'?>">services</a></li>
                                 </ul>
                             </li>
-                            <li><a href="dasboard/portfolio">Portfolio</a></li>
-                            <li><a href="dasboard/blog">Blog</a></li>
-                            <li><a href="dasboard/contact">Contact</a></li>
+                            <li><a href="<?= ROOT . '/dashboard/portfolio'?>">Portfolio</a></li>
+                            <li><a href="<?= ROOT . '/dashboard/blog'?>">Blog</a></li>
+                            <li><a href="<?= ROOT . '/dashboard/blog'?>">Contact</a></li>
                         </ul>
                     </li>
-                    <li class="dashboard-nav-item"><a href="/dashboard/blog"  >Blog</a></li>
                     <li class="dashboard-nav-item"><a href="/dashboard/team"  >Team</a></li>
                 </ul>
                 <div class="nav-bootm">

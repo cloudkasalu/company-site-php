@@ -57,7 +57,10 @@
                 <div class="team-member">
                     <div class="member-image">
                         <div class="image-container">
-                            <img <?= 'src="data:image/webp;base64,'.base64_encode($content['profile_image']).'"';?> alt="<?= htmlspecialchars($content['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>" width="268" height="300" loading="lazy">
+                            <img 
+                            <?php echo 'src="data:image/svg+xml;base64,'.base64_encode($content['profile_image']).'"';?>
+                             alt="<?= htmlspecialchars($content['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>" 
+                             width="268" height="300" loading="lazy">
                         </div>
                     </div>
                     <div class="member-details center">

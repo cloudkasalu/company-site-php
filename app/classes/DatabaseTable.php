@@ -40,6 +40,8 @@ class DatabaseTable{
         ];
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
+
+        return $stmt->fetch();
     }
 
     public function update($values) {
@@ -54,6 +56,47 @@ class DatabaseTable{
         $values['primaryKey'] = $values['id'];
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
+    }
+
+    // public function save($record) {
+    //     try {
+    //     if (empty($record[$this->primaryKey])){
+    //     unset($record[$this->primaryKey]);
+    //     }
+    //     $this->insert($record);
+    //     } catch (\PDOException $e) {
+    //     $this->update($record);
+    //     }
+    // }
+        
+
+    public function insert($values) {
+            $query = 'INSERT INTO `' . $this->table . '` (';
+            foreach ($values as $key => $value) {
+            $query .= '`' . $key . '`,';
+            }
+
+            $query = rtrim($query, ',');
+
+            $query .= ') VALUES (';
+            foreach ($values as $key => $value) {
+            $query .= ':' . $key . ',';
+            }
+            $query = rtrim($query, ',');
+            $query .= ')';
+            $values = $this->processDates($values);
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($values);
+    }
+
+    private function processDates($values) {
+        foreach ($values as $key => $value) {
+        if ($value instanceof DateTime) {
+        $values[$key] = $value->format('Y-m-d');
         }
+        }
+        return $values;
+    }
+            
 
 }
