@@ -130,7 +130,7 @@ use classes\DatabaseTable;
     }
     public function portfolio(...$route){
 
-        $api = array_shift($route);
+        $api = array_shift($route[0]);
         if($api === "projects"){
 
             $portfolioTable = new DatabaseTable($this->pdo,'portfolio','id');
@@ -165,4 +165,6 @@ use classes\DatabaseTable;
         $title = 'Contact Us';
         return ['template' => 'visitor/blog.html.php', 'title' => $title];
     }
+
+    
 }

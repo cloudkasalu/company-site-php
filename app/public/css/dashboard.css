@@ -315,6 +315,15 @@ input, textarea {
   justify-content: center;
   overflow: hidden;
 }
+#dashboard .icon-content {
+  display: flex;
+  align-items: center;
+}
+#dashboard .icon-content svg {
+  margin-right: 0.8rem;
+  width: 28px;
+  height: 28px;
+}
 #dashboard > * {
   padding: 2rem;
 }
@@ -336,9 +345,35 @@ input, textarea {
 #dashboard aside nav .dashboard-nav-item {
   margin-bottom: 1rem;
 }
-#dashboard section {
+#dashboard aside nav .dropdown {
+  transition: all ease-in 300ms;
+}
+#dashboard aside nav .dropdown:hover > .dropdown-list {
+  display: block;
+}
+#dashboard aside nav .dropdown-list {
+  margin-top: 0.5rem;
+  margin-left: 2.5rem;
+  width: 100%;
+  display: none;
+}
+#dashboard aside nav .dropdown-list li {
+  margin-top: 1rem;
+  width: 100%;
+}
+#dashboard .main-section {
   width: 75vw;
   height: 100%;
   background-color: #F7FAFB;
-  overflow:scroll;
+}
+#dashboard .main-section .content {
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+#dashboard .main-section .content form {
+  max-width: 600px;
+  background-color: white;
+  padding: 3rem;
+  border-radius: 10px;
 }/*# sourceMappingURL=dashboard.css.map */

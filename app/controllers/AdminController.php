@@ -5,23 +5,29 @@ use classes\DatabaseTable;
 class AdminController{
 
     private $pdo;
+    private $portfolioTable;
+    private $servicesTable;
+    private $blogTable;
+
+    private $usersTable;
 
     public function __construct($pdo){
         $this->pdo = $pdo;
+        $this->portfolioTable = new DatabaseTable($this->pdo,'portfolio','id');
+        $this->servicesTable =  new DatabaseTable($this->pdo,'services','id');
+        $this->blogTable =  new DatabaseTable($this->pdo,'blog','id');
+        $this->usersTable = new DatabaseTable($this->pdo, 'users', 'id');
     }
 
 
     public function home(){
         $title = "Admin";
-
         return ['template'=> '/admin/home.html.php', 'title'=> $title];
 
     }
 
-    public function about($variables = null){
+    public function aboutSection(){
 
-        $sub_route = array_shift($variables);
-        if( $sub_route === 'section'){
             $aboutSectionTable = new DatabaseTable($this->pdo,'about_us','id');
             if($_SERVER['REQUEST_METHOD'] === 'POST') {
     
@@ -45,13 +51,16 @@ class AdminController{
                 
                 $aboutSection = $aboutSectionTable->findAll();
         
-                return ['template'=> '/admin/about_section.html.php', 'title'=> $title, 'variables'=>[
+                return ['template'=> '/admin/aboutSection.html.php', 'title'=> $title, 'variables'=>[
                     'aboutSection'=> $aboutSection
                 ]];
     
             }
 
-        }else if($sub_route === 'team'){
+    }
+
+
+    public function aboutTeam($variables = null){
 
             $aboutTeamTable = new DatabaseTable($this->pdo,'team','id');
 
@@ -92,31 +101,28 @@ class AdminController{
                 ]];
 
             }
-        }
 
     }
 
-    public function services ($variables){
-        $sub_route = array_shift($variables);
+    public function servicesSection(){
 
-        if($sub_route == "section"){
-            $serviceSectionTable = new DatabaseTable($this->pdo,'services_section','id');
-            if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-                $values= [
-                    'section_title' => $_POST['title'], 
-                    'section_paragraph' => $_POST['paragraph'],
-                    'section_image' => file_get_contents($_FILES['image']['tmp_name']),
-                    'section_image_caption' => $_POST['caption'],
-                    'vision' => $_POST['vision'],
-                    'goal' => $_POST['goal'],
-                    'id'=> 1
-                ];
-    
-                $serviceSection = $serviceSectionTable->update($values);
-    
-                http_response_code(301);
-                header('Location: /dashboard');
+        $serviceSectionTable = new DatabaseTable($this->pdo,'services_section','id');
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $values= [
+                'section_title' => $_POST['title'], 
+                'section_paragraph' => $_POST['paragraph'],
+                'section_image' => file_get_contents($_FILES['image']['tmp_name']),
+                'section_image_caption' => $_POST['caption'],
+                'vision' => $_POST['vision'],
+                'goal' => $_POST['goal'],
+                'id'=> 1
+            ];
+
+            $serviceSection = $serviceSectionTable->update($values);
+
+            http_response_code(301);
+            header('Location: /dashboard');
         }else{
                 $title = "Edit Services Section";
                     
@@ -127,9 +133,19 @@ class AdminController{
                 ]];
 
         }
-        }else if($sub_route === 'list'){
+    }
 
-            $servicesTable = new DatabaseTable($this->pdo,'services','id');
+    private function editService($id){
+        $title = "Edit Service";
+        $service = $this->servicesTable->find('id',$id);
+
+        return ['template'=> '/admin/editService.html.php', 'title'=> $title, 'variables'=>[
+            'service'=> $service
+        ]];
+
+    }
+
+    public function servicesList ($variables){
 
             if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
@@ -146,7 +162,7 @@ class AdminController{
 
                     ];
     
-                    $servicesTable->update($values);
+                    $this->servicesTable->update($values);
                     http_response_code(301);
                     header('Location: /dashboard/services/list');
                 }else{
@@ -160,7 +176,7 @@ class AdminController{
                         'date' => $date->format('Y-m-d H:i:s')
                     ];
     
-                    $servicesTable->insert($values);
+                    $this->servicesTable->insert($values);
                     http_response_code(301);
                     header('Location: /dashboard/services/list');
 
@@ -170,14 +186,10 @@ class AdminController{
 
                 $route = array_shift($variables);
                 if($route === "edit"){
-                    $id = array_shift($variables);
 
-                    $title = "Edit Service";
-                    $service = $servicesTable->find('id',$id);
-            
-                    return ['template'=> '/admin/editService.html.php', 'title'=> $title, 'variables'=>[
-                        'service'=> $service
-                    ]];
+                    $id = array_shift($variables);
+                    return $this->editService($id);
+
                 }else if($route === "create"){
                     $title = "Create Service";
                     return ['template'=> '/admin/postService.html.php', 'title'=> $title];
@@ -185,22 +197,28 @@ class AdminController{
 
                 $title = "View Services";
                 
-                $services = $servicesTable->findAll();
+                $services = $this->servicesTable->findAll();
         
                 return ['template'=> '/admin/viewServices.html.php', 'title'=> $title, 'variables'=>[
                     'services'=> $services
                 ]];
 
             }
-        }
     }
 
     public function portfolio($variables){
-        $route = array_shift($variables);
-        $portfolioTable = new DatabaseTable($this->pdo,'portfolio','id');
 
-        if($route){
+        $title = "View Projects";
+            
+        $projects = $this->portfolioTable->findAll();
 
+        return ['template'=> '/admin/viewProjects.html.php', 'title'=> $title, 'variables'=>[
+            'projects'=> $projects
+        ]];
+
+    }
+
+    public function portfolioEdit($variables){
             if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
                 if(isset($_POST['id'])){
@@ -214,10 +232,29 @@ class AdminController{
 
                     ];
     
-                    $portfolioTable->update($values);
+                    $this->portfolioTable->update($values);
                     http_response_code(301);
                     header('Location: /dashboard/portfolio');
-                }else{
+                }
+
+            }else{
+
+                    $id = array_shift($variables);
+
+                    echo $id;
+                    $title = "Edit Project";
+                    $project = $this->portfolioTable->find('id',$id);
+            
+                    return ['template'=> '/admin/editProject.html.php', 'title'=> $title, 'variables'=>[
+                        'project'=> $project
+                    ]];
+            }
+    }
+
+    public function portfolioPost($variables){
+
+            if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
                     $date = new \DateTime();
                     $values= [
                         'section_id' => 5,
@@ -228,70 +265,33 @@ class AdminController{
                         'project_date' => $date->format('Y-m-d H:i:s')
                     ];
     
-                    $portfolioTable->insert($values);
+                    $this->portfolioTable->insert($values);
                     http_response_code(301);
                     header('Location: /dashboard/portfolio');
 
-                }
-
-            }else{
-
-                if($route === "edit"){
-                    $id = array_shift($variables);
-
-                    echo $id;
-                    $title = "Edit Project";
-                    $project = $portfolioTable->find('id',$id);
-            
-                    return ['template'=> '/admin/editProject.html.php', 'title'=> $title, 'variables'=>[
-                        'project'=> $project
-                    ]];
-                }else if($route === "post"){
+                }else{
                     $title = "Create Service";
                     return ['template'=> '/admin/postProject.html.php', 'title'=> $title];
                 }
-
-
-            }
-        }else{
-
-            $title = "View Projects";
-                
-            $projects = $portfolioTable->findAll();
-    
-            return ['template'=> '/admin/viewProjects.html.php', 'title'=> $title, 'variables'=>[
-                'projects'=> $projects
-            ]];
-        }
-
     }
 
     public function blog($variables){
-        $sub_route = array_shift($variables);
 
-        $blogTable = new DatabaseTable($this->pdo,'blog','id');
+            $title = "View Article";
+                
+            $articles = $this->blogTable->findAll();
+    
+            return ['template'=> '/admin/viewArticles.html.php', 'title'=> $title, 'variables'=>[
+                'articles'=> $articles
+            ]];
 
-        if($sub_route){
+    }
+
+    public function blogPost($variables){
+  
 
             if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
-                if(isset($_POST['id'])){
-
-                    $date = new \DateTime();
-                    $values= [
-                        'id' => $_POST['id'],
-                        'service_title' => $_POST['name'],
-                        'service_description' => $_POST['description'],
-                        'service_icon' => file_get_contents($_FILES['image']['tmp_name']),
-                        'service_icon_caption' => $_POST['caption'],
-                        'date' => $date->format('Y-m-d H:i:s')
-
-                    ];
-    
-                    $blogTable->update($values);
-                    http_response_code(301);
-                    header('Location: /dashboard/portfolio');
-                }else{
                     $date = new \DateTime();
                     $values= [
                         'section_id' => 4,
@@ -302,41 +302,106 @@ class AdminController{
                         'date' => $date->format('Y-m-d H:i:s')
                     ];
     
-                    $blogTable->insert($values);
+                    $this->blogTable->insert($values);
                     http_response_code(301);
                     header('Location: /dashboard/portfolio');
 
-                }
+                }else{
 
-            }else{
+                    $title = "Create Service";
+                    return ['template'=> '/admin/postArticle.html.php', 'title'=> $title];
+ 
 
-                $route = array_shift($variables);
-                if($route === "edit"){
+
+            }
+
+
+    }
+    public function blogEdit($variables){
+
+            if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+                    $values= [
+                        'id' => $_POST['id'],
+                        'service_title' => $_POST['name'],
+                        'service_description' => $_POST['description'],
+                        'service_icon' => file_get_contents($_FILES['image']['tmp_name']),
+                        'service_icon_caption' => $_POST['caption'],
+
+                    ];
+    
+                    $this->blogTable->update($values);
+                    http_response_code(301);
+                    header('Location: /dashboard/portfolio');
+                }else{
+
                     $id = array_shift($variables);
 
                     $title = "Edit Article";
-                    $article = $blogTable->find('id',$id);
+                    $article = $this->blogTable->find('id',$id);
             
                     return ['template'=> '/admin/editArticles.html.php', 'title'=> $title, 'variables'=>[
                         'article'=> $article
                     ]];
-                }else if($route === "create"){
-                    $title = "Create Service";
-                    return ['template'=> '/admin/postArticle.html.php', 'title'=> $title];
-                }
 
 
             }
-        }else{
 
-            $title = "View Article";
+    }
+
+
+    public function register(){
+
+        $title = "Register";
+
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+            $errors = [];
+
+            $email = $_POST['email'];
+            $name = $_POST['name'];
+            $password = $_POST['password'];
+
+            if(empty($name)){
+                $errors[] = "Enter  Name";
+            }
+            if(empty($email)){
+                $errors[] = "Enter  Password";
+            }
+                else if(filter_var($email, FILTER_VALIDATE_EMAIL) == false) {
+                    $errors[] = 'Enter Valid Email';
+                }else if ($this->usersTable->find('email', $email) !== false) {
+                    $errors[] = 'That email address is already registered';
+                }
+                    
+            if(empty($password)){
+                $errors[] = "Enter  Password";
+            }
+
+            if(empty($errors)){
                 
-            $articles = $blogTable->findAll();
-    
-            return ['template'=> '/admin/viewArticles.html.php', 'title'=> $title, 'variables'=>[
-                'articles'=> $articles
+                $values = [
+                    'name' => $_POST['name'],
+                    'email' => $_POST['email'],
+                    'password' => password_hash($_POST['password'], PASSWORD_DEFAULT)
+                ];
+
+                $this->usersTable->insert($values);
+
+                header('Location: /dashboard');
+            }
+
+            return ['template' => '/admin/register.html.php', 'title' => $title, 'variables'=>[
+                'errors' => $errors,
             ]];
+
         }
+
+        return ['template' => '/admin/register.html.php', 'title' => $title];
+
+    }
+    public function registerSuccess(){
+    
 
     }
 

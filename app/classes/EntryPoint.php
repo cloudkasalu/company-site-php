@@ -1,5 +1,7 @@
 <?php
 namespace classes;
+use controllers\AuthController;
+use controllers\LoginController;
 use controllers\VisitorController;
 class EntryPoint{
     public function __construct(){
@@ -33,37 +35,57 @@ class EntryPoint{
             // include __DIR__ . '/../controllers/VisitorController.php';
             // include __DIR__ . '/../includes/autoload.php';
 
+            $auth = new Authentication(new DatabaseTable ($pdo,'users','id'),'name','password');
+
             $this->checkUri($url);
 
-            if ($url == '') {
-            $url = 'home';
-            }
-        
+            $url == ''? $url = 'home' : $url;
+    
             $url_request = explode('/', $url);
         
             $route = array_shift($url_request);
+            $action = null;
+            $controller = null;
 
-            if($route === 'dashboard'){
+            switch ($route) {
+                case 'dashboard':
+                    if($auth->isLoggedIn()){
+                        $req = array_shift($url_request);
+                        !$req ? $action = 'home' :  $action = $req . ucfirst(array_shift($url_request)?? '') ;
+                        $controller = new \controllers\AdminController($pdo);
+                    }else{
+                        header('Location: /login');
+                        exit();
+                    }
+                    break;
+                case 'login':
+                case 'logout':
+                    $action = $route;
+                    $controller = new LoginController($pdo, $auth);
+                    break;
+                default:
+                    $action = $route;
+                    $controller = new VisitorController($pdo);
 
-                $action = array_shift($url_request);
-
-                if(!$action){
-                    $action = "home";
-                }
-                $controller = new \controllers\AdminController($pdo);
-                $page = $controller->$action($url_request);
-
-            }else{
-
-                $api = array_shift($url_request);
-                $controller = new VisitorController($pdo);
-                $page = $controller->$route($api);
-                
             }
 
-            $title = $page['title'];
-            $variables = $page['variables'] ?? [];
-            $output = $this->loadTemplate($page['template'], $variables);
+
+            if(is_callable([$controller, $action])){
+                    $page = $controller->$action($url_request);
+                    $title = $page['title'];
+                    $variables = $page['variables'] ?? [];
+                    $output = $this->loadTemplate($page['template'], $variables);
+            }else{
+                http_response_code(404);
+
+                $route = "error";
+                $title = 'Not found';
+
+                ob_start();
+                include __DIR__ . '/../templates/404.html.php';
+                $output = ob_get_clean();
+        
+            }
         
             
         } catch (\PDOException $e) {
@@ -71,9 +93,6 @@ class EntryPoint{
             $output = 'Database error: ' . $e->getMessage() . ' in ' .
             $e->getFile() . ':' . $e->getLine();
         }
-
-        $url_request = explode('/', $url);
-        $route = array_shift($url_request);
 
         if($route === "dashboard"){
             include __DIR__ . '/../templates/admin/layout.php';
