@@ -10,9 +10,11 @@ class AdminController{
     private $blogTable;
 
     private $usersTable;
+    private $authentication;
 
-    public function __construct($pdo){
+    public function __construct($pdo,$auth){
         $this->pdo = $pdo;
+        $this->authentication = $auth;
         $this->portfolioTable = new DatabaseTable($this->pdo,'portfolio','id');
         $this->servicesTable =  new DatabaseTable($this->pdo,'services','id');
         $this->blogTable =  new DatabaseTable($this->pdo,'blog','id');
@@ -278,8 +280,10 @@ class AdminController{
     public function blog($variables){
 
             $title = "View Article";
+
+            $query = 'SELECT * FROM `blog` INNER JOIN `users` ON `blog`.`author_id` = `users`.`id`';
                 
-            $articles = $this->blogTable->findAll();
+            $articles = $this->blogTable->findAll($query);
     
             return ['template'=> '/admin/viewArticles.html.php', 'title'=> $title, 'variables'=>[
                 'articles'=> $articles
@@ -287,24 +291,29 @@ class AdminController{
 
     }
 
-    public function blogPost($variables){
+    public function blogPost(){
   
 
             if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
-                    $date = new \DateTime();
+                $author = $this->authentication->findUser($_SESSION['username']);
+                $date = new \DateTime();
+
+                var_dump($author);
+
                     $values= [
-                        'section_id' => 4,
-                        'service_title' => $_POST['name'],
-                        'service_description' => $_POST['description'],
-                        'service_icon' => file_get_contents($_FILES['image']['tmp_name']),
-                        'service_icon_caption' => $_POST['caption'],
-                        'date' => $date->format('Y-m-d H:i:s')
+                        'section_id' => 6,
+                        'author_id' => $author['id'],
+                        'post_title' => $_POST['title'],
+                        'post_paragraph' => $_POST['paragraph'],
+                        'post_image' => file_get_contents($_FILES['image']['tmp_name']),
+                        'post_image_caption' => $_POST['caption'],
+                        'post_date' => $date->format('Y-m-d H:i:s')
                     ];
     
                     $this->blogTable->insert($values);
                     http_response_code(301);
-                    header('Location: /dashboard/portfolio');
+                    header('Location: /dashboard/blog');
 
                 }else{
 
@@ -323,16 +332,16 @@ class AdminController{
 
                     $values= [
                         'id' => $_POST['id'],
-                        'service_title' => $_POST['name'],
-                        'service_description' => $_POST['description'],
-                        'service_icon' => file_get_contents($_FILES['image']['tmp_name']),
-                        'service_icon_caption' => $_POST['caption'],
+                        'post_title' => $_POST['title'],
+                        'post_paragraph' => $_POST['paragraph'],
+                        'post_image' => file_get_contents($_FILES['image']['tmp_name']),
+                        'post_image_caption' => $_POST['caption'],
 
                     ];
     
                     $this->blogTable->update($values);
                     http_response_code(301);
-                    header('Location: /dashboard/portfolio');
+                    header('Location: /dashboard/blog');
                 }else{
 
                     $id = array_shift($variables);
@@ -340,7 +349,7 @@ class AdminController{
                     $title = "Edit Article";
                     $article = $this->blogTable->find('id',$id);
             
-                    return ['template'=> '/admin/editArticles.html.php', 'title'=> $title, 'variables'=>[
+                    return ['template'=> '/admin/editArticle.html.php', 'title'=> $title, 'variables'=>[
                         'article'=> $article
                     ]];
 
@@ -381,7 +390,7 @@ class AdminController{
             if(empty($errors)){
                 
                 $values = [
-                    'name' => $_POST['name'],
+                    'username' => $_POST['name'],
                     'email' => $_POST['email'],
                     'password' => password_hash($_POST['password'], PASSWORD_DEFAULT)
                 ];

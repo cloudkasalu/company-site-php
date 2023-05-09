@@ -5,7 +5,7 @@
         <div class="image-container">
             <img 
             <?php echo 'src="data:image/webp;base64,'.base64_encode($article['post_image']).'"';?>
-             alt="<?= htmlspecialchars($article['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>"
+             alt="<?= htmlspecialchars($article['post_image_caption'], ENT_QUOTES, 'UTF-8')?>"
              >
         </div>
     </div>
@@ -18,19 +18,19 @@
                 <div class="author-image">
                     <div class="image-container">
                        <img 
-                        <?php echo 'src="data:image/webp;base64,'.base64_encode($article['author_image']).'"';?>
-                        alt="<?= htmlspecialchars($article['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>"
+                        <?php echo 'src="data:image/webp;base64,'.base64_encode($article['user_image']).'"';?>
+                        alt="user image"
                         >
                     </div>
                 </div>
                 <div class="author-name">
-                <?= htmlspecialchars( $article['author_name'], ENT_QUOTES, 'UTF-8')?>
+                <?= htmlspecialchars( $article['username'], ENT_QUOTES, 'UTF-8')?>
                 </div>
             </div>
-            <div class="date"><?php $date = new DateTime($response['post_date']); echo $date->format('jS F Y H:i'); ?></div>
+            <div class="date"><?php $date = new DateTime($article['post_date']); echo $date->format('jS F Y H:i'); ?></div>
         </div>
     </div>
 </a>
 <?php endforeach;?>
 
-<a href="<?= ROOT . '/dashboard/blog/create'?>" class="btn btn-primary">Create Article</a>
+<a href="<?= ROOT . '/dashboard/blog/post'?>" class="btn btn-primary">Create Article</a>

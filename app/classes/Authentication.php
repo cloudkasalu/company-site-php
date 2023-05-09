@@ -13,14 +13,21 @@ class Authentication{
         session_start();
     }
 
+    
+
     private function getUser($method){
         if(filter_var($method, FILTER_VALIDATE_EMAIL)){
             $user = $this->usersTable->find('email', strtolower($method));
 
         }else{
-            $user = $this->usersTable->find('name', strtolower($method));
+            $user = $this->usersTable->find('username', strtolower($method));
         }
 
+        return $user;
+    }
+
+    public function findUser($method){
+        $user = $this->usersTable->find('username', strtolower($method));
         return $user;
     }
 
@@ -33,7 +40,7 @@ class Authentication{
 
         session_regenerate_id();
 
-        $_SESSION['username'] = $user['name'];
+        $_SESSION['username'] = $user['username'];
         $_SESSION['password'] = $user['password'];
 
             return true;

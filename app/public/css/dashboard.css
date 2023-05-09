@@ -324,10 +324,9 @@ input, textarea {
   width: 28px;
   height: 28px;
 }
-#dashboard > * {
-  padding: 2rem;
-}
+
 #dashboard aside {
+  padding: 2rem;
   width: 25vw;
   height: 100%;
   background-color: var(--primary-color);
@@ -365,10 +364,16 @@ input, textarea {
   width: 75vw;
   height: 100%;
   background-color: #F7FAFB;
+  padding: 0;
+}
+#dashboard .main-section header{
+  padding: 2rem;
 }
 #dashboard .main-section .content {
   overflow: hidden;
   overflow-y: scroll;
+  height: 100%;
+  padding-left: 2rem;
 }
 
 #dashboard .main-section .content form {

@@ -23,7 +23,7 @@ class DatabaseTable{
             $stmt->execute();
         } else if (count($args) === 1) {
             // Do something with two arguments
-
+            
             $stmt = $this->pdo->prepare($args[0]);
             $stmt->execute();
 
