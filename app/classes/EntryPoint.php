@@ -1,8 +1,9 @@
 <?php
-namespace classes;
-use controllers\AuthController;
-use controllers\LoginController;
-use controllers\VisitorController;
+namespace Classes;
+use Classes\Authentication;
+use Classes\Controllers\AdminController;
+use Classes\Controllers\LoginController;
+use Classes\Controllers\VisitorController;
 class EntryPoint{
     public function __construct(){
 
@@ -52,7 +53,7 @@ class EntryPoint{
                     if($auth->isLoggedIn()){
                         $req = array_shift($url_request);
                         !$req ? $action = 'home' :  $action = $req . ucfirst(array_shift($url_request)?? '') ;
-                        $controller = new \controllers\AdminController($pdo,$auth);
+                        $controller = new AdminController($pdo,$auth);
                     }else{
                         header('Location: /login');
                         exit();

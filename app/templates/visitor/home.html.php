@@ -385,9 +385,9 @@
             </div>
                 <div class="contact-container">
                     <div class="contact-form">
-                        <form action="">
+                        <form action="/contact" method="post">
                             <label for="name"></label>
-                            <input type="email" name="name" id="name" placeholder="Name">
+                            <input type="text" name="name" id="name" placeholder="Name">
 
                             <label for="email"></label>
                             <input type="email" name="email" id="email" placeholder="Email">

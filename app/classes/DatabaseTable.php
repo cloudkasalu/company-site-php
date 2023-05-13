@@ -1,5 +1,5 @@
 <?php
-namespace classes;
+namespace Classes;
 
 class DatabaseTable{
     private $pdo;

@@ -1,13 +1,13 @@
 <?php 
 
+use Classes\EntryPoint;
 
-// include_once '../classes/EntryPoint.php';
-include __DIR__ . '/../includes/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 include_once __DIR__ . '/../includes/global.php';
 
 
 $url = strtok(ltrim($_SERVER['REQUEST_URI'], '/'), '?');
 
-$entryPoint = new \classes\EntryPoint();
+$entryPoint = new EntryPoint();
 $entryPoint->run($url);
 

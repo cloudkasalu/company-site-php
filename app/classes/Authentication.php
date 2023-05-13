@@ -1,11 +1,10 @@
 <?php
-namespace classes;
+namespace Classes;
 
 class Authentication{
 
     private $pdo;
     private $usersTable;
-
 
 
     public function __construct(DatabaseTable $userTable, private string $userColumn, private string $passwordColumn ){
@@ -14,7 +13,6 @@ class Authentication{
     }
 
     
-
     private function getUser($method){
         if(filter_var($method, FILTER_VALIDATE_EMAIL)){
             $user = $this->usersTable->find('email', strtolower($method));
