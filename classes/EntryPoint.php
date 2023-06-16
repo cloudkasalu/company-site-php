@@ -36,7 +36,7 @@ class EntryPoint{
             // include __DIR__ . '/../controllers/VisitorController.php';
             // include __DIR__ . '/../includes/autoload.php';
 
-            $auth = new Authentication(new DatabaseTable ($pdo,'users','id'),'username','password');
+            $auth = new Authentication(new DatabaseTable ($pdo,'team','id'),'email','password');
 
             $this->checkUri($url);
 
@@ -50,10 +50,12 @@ class EntryPoint{
 
             switch ($route) {
                 case 'dashboard':
+
                     if($auth->isLoggedIn()){
                         $req = array_shift($url_request);
                         !$req ? $action = 'home' :  $action = $req . ucfirst(array_shift($url_request)?? '') ;
                         $controller = new AdminController($pdo,$auth);
+
                     }else{
                         header('Location: /login');
                         exit();

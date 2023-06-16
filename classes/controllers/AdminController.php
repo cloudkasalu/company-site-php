@@ -10,6 +10,7 @@ class AdminController{
     private $blogTable;
 
     private $usersTable;
+    private $teamTable;
     private $authentication;
 
     public function __construct($pdo,$auth){
@@ -19,6 +20,7 @@ class AdminController{
         $this->servicesTable =  new DatabaseTable($this->pdo,'services','id');
         $this->blogTable =  new DatabaseTable($this->pdo,'blog','id');
         $this->usersTable = new DatabaseTable($this->pdo, 'users', 'id');
+        $this->teamTable = new DatabaseTable($this->pdo, 'team', 'id');
     }
 
 
@@ -62,17 +64,17 @@ class AdminController{
     }
 
 
-    public function aboutTeam($variables = null){
+    public function team($variables = null){
 
             $aboutTeamTable = new DatabaseTable($this->pdo,'team','id');
 
             if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
                 $values= [
-                    'member_name' => $_POST['name'],
-                    'member_position' => $_POST['position'],
-                    'profile_image' => file_get_contents($_FILES['image']['tmp_name']),
-                    'profile_image_caption' => $_POST['caption'],
+                    'firstname' => $_POST['firstname'],
+                    'lastname' => $_POST['lastname'],
+                    'position' => $_POST['position'],
+                    'profile_picture' =>  file_get_contents($_FILES['image']['tmp_name']) ?? $_POST['profile_picture'],
                     'id' => $_POST['id']
                 ];
 
@@ -87,7 +89,7 @@ class AdminController{
                 $id = array_shift($variables);
                 if($id){
                     $title = "Edit Member";
-                    $member = $aboutTeamTable->find('id',$id);
+                    $member = $this->teamTable->find('id',$id);
             
                     return ['template'=> '/admin/editTeam.html.php', 'title'=> $title, 'variables'=>[
                         'member'=> $member
@@ -95,11 +97,15 @@ class AdminController{
                 }
 
                 $title = "View Team Members";
+
+                $currentUser = $_SESSION['username'];
+                $permission = $this->authentication->findUser($currentUser)['access'];
                 
                 $aboutTeam = $aboutTeamTable->findAll();
         
                 return ['template'=> '/admin/viewTeam.html.php', 'title'=> $title, 'variables'=>[
-                    'aboutTeam'=> $aboutTeam
+                    'aboutTeam'=> $aboutTeam,
+                    'permission'=> $permission
                 ]];
 
             }
@@ -358,30 +364,101 @@ class AdminController{
 
     }
 
+    // public function teamEdit($id){
 
-    public function register(){
+    //     $member = [];
+    //     $result = $this->teamTable->find('id',$id);
 
-        $title = "Register";
+    //     foreach($result as $row){
+    //         $member[] = array(
+    //             'id' => $row['id'],
+    //             'image'=> array(
+    //                 'src'=>  base64_encode($row['profile_picture']),
+    //                 'alt'=> $row['position']
+    //             ),
+    //             'description' => $row['project_description']
+    //         ); 
+    //     }
+    //     header('Content-Type: application/json');
+
+    //     exit (json_encode($member));
+    // }
+
+
+    public function teamRegister($args){
+        if(count($args)){
+            return $this->registerUser($args);
+        }else{
+            return $this->registerMember();
+        }
+
+    }
+    private function registerMember(){
+
+        $title = "Register Member";
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             $errors = [];
 
             $email = $_POST['email'];
-            $name = $_POST['name'];
-            $password = $_POST['password'];
+            $firstname = $_POST['firstname'];
+            $lastname = $_POST['lastname'];
+            $position = $_POST['position'];
+            $display = $_POST['display'];
 
-            if(empty($name)){
-                $errors[] = "Enter  Name";
+            if(empty($firstname)){
+                $errors[] = "Enter  Firstname";
+            }
+            if(empty($lastname)){
+                $errors[] = "Enter  Lastname";
             }
             if(empty($email)){
-                $errors[] = "Enter  Password";
+                $errors[] = "Enter  Email";
             }
                 else if(filter_var($email, FILTER_VALIDATE_EMAIL) == false) {
                     $errors[] = 'Enter Valid Email';
-                }else if ($this->usersTable->find('email', $email) !== false) {
+                }else if ($this->teamTable->find('email', $email) !== false) {
                     $errors[] = 'That email address is already registered';
                 }
+                    
+
+            if(empty($errors)){
+                
+                $values = [
+                    'section_id' => 1,
+                    'firstname' => $_POST['firstname'],
+                    'lastname' => $_POST['lastname'],
+                    'email' => $_POST['email'],
+                    'position' => $_POST['position'],
+                    'display' => $_POST['display'] ? 1 : 0,
+                ];
+
+                $this->teamTable->insert($values);
+
+                header('Location: /dashboard');
+            }
+
+            return ['template' => '/admin/registerMember.html.php', 'title' => $title, 'variables'=>[
+                'errors' => $errors,
+            ]];
+
+        }else{
+
+    
+            return ['template' => '/admin/registerMember.html.php', 'title' => $title];
+        }
+
+    }
+    private function registerUser($id){
+
+        $title = "Register User";
+
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+            $errors = [];
+
+            $password = $_POST['password'];
                     
             if(empty($password)){
                 $errors[] = "Enter  Password";
@@ -390,28 +467,88 @@ class AdminController{
             if(empty($errors)){
                 
                 $values = [
-                    'username' => $_POST['name'],
-                    'email' => $_POST['email'],
+                    'user' => $_POST['id'],
+                    'access' => $_POST['access'],
                     'password' => password_hash($_POST['password'], PASSWORD_DEFAULT)
                 ];
 
                 $this->usersTable->insert($values);
 
+                $update = [
+                    'id'=>$_POST['id'],
+                    'registered'=>1
+                ];
+                $this->teamTable->update($update);
+
                 header('Location: /dashboard');
             }
 
-            return ['template' => '/admin/register.html.php', 'title' => $title, 'variables'=>[
+            return ['template' => '/admin/registerUser.html.php', 'title' => $title, 'variables'=>[
                 'errors' => $errors,
             ]];
 
+        }else{
+
+            $member = $this->teamTable->find('id',$id[0]);
+
+            return ['template' => '/admin/registerUser.html.php', 'title' => $title, 'variables'=>[
+                'member' => $member
+            ]];
         }
 
-        return ['template' => '/admin/register.html.php', 'title' => $title];
+    }
+    private function updateUser($id){
+
+        $title = "update User";
+
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+            $errors = [];
+
+            $password = $_POST['password'];
+                    
+            if(empty($password)){
+                $errors[] = "Enter  Password";
+            }
+
+            if(empty($errors)){
+                
+                $values = [
+                    'user' => $_POST['id'],
+                    'access' => $_POST['access'],
+                    'password' => password_hash($_POST['password'], PASSWORD_DEFAULT)
+                ];
+
+                $update = [
+                    'id'=>$_POST['id'],
+                    'registered'=>1
+                ];
+
+                $this->usersTable->insert($values);
+
+                $update = [
+                    'id'=>$_POST['id'],
+                    'registered'=>1
+                ];
+                $this->teamTable->update($update);
+
+                header('Location: /dashboard');
+            }
+
+            return ['template' => '/admin/registerUser.html.php', 'title' => $title, 'variables'=>[
+                'errors' => $errors,
+            ]];
+
+        }else{
+
+            $member = $this->teamTable->find('id',$id[0]);
+
+            return ['template' => '/admin/registerUser.html.php', 'title' => $title, 'variables'=>[
+                'member' => $member
+            ]];
+        }
 
     }
-    public function registerSuccess(){
-    
 
-    }
 
 }

@@ -41,14 +41,16 @@ use Symfony\Component\Mime\Email;
                 'contact_title' => $row['contact_title'],
                 'contact_details' => $row['contact_details']
             );
-
             $teamSection[] = array(
-                'member_name' => $row['member_name'], 
-                'member_position' => $row['member_position'],
-                'profile_image' => $row['profile_image'],
-                'profile_image_caption' => $row['profile_image_caption']
+                'firstname' => $row['firstname'], 
+                'lastname' => $row['lastname'], 
+                'position' => $row['position'],
+                'profile_picture' => $row['profile_picture'],
+                'display' => $row['display']
             );
         }
+
+        var_dump($teamSection);
         
         return ['template' => '/visitor/home.html.php', 'title' => $title, 'variables'=>[
             'aboutSection' => $aboutSection,
@@ -80,10 +82,11 @@ use Symfony\Component\Mime\Email;
             );
 
             $teamSection[] = array(
-                'member_name' => $row['member_name'], 
-                'member_position' => $row['member_position'],
-                'profile_image' => $row['profile_image'],
-                'profile_image_caption' => $row['profile_image_caption']
+                'firstname' => $row['firstname'], 
+                'lastname' => $row['lastname'], 
+                'position' => $row['position'],
+                'profile_picture' => $row['profile_picture'],
+                'display' => $row['display']
             );
         }
 

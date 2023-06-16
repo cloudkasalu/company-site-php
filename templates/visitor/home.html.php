@@ -267,19 +267,19 @@
             </div>
             <div class="team-members">
             <?php foreach($teamSection as $content):?>
-                    <?php if(isset($content['member_name'])) {?>
+                    <?php if(isset($content['firstname'])&& $content['display'] === true) {?>
                 <div class="team-member">
                     <div class="member-image">
                         <div class="image-container">
                             <img 
-                            <?php echo 'src="data:image/webp;base64,'.base64_encode($content['profile_image']).'"';?>
-                             alt="<?= htmlspecialchars($content['profile_image_caption'], ENT_QUOTES, 'UTF-8')?>" 
+                            <?php echo 'src="data:image/webp;base64,'.base64_encode($content['profile_picture']).'"';?>
+                             alt="<?= htmlspecialchars($content['profile_picture'], ENT_QUOTES, 'UTF-8')?>" 
                              width="268" height="300" loading="lazy">
                         </div>
                     </div>
                     <div class="member-details center">
-                        <h5 class="secondary-color name"><?= htmlspecialchars($content['member_name'], ENT_QUOTES, 'UTF-8')?></h5>
-                        <span class="position"><?= htmlspecialchars($content['member_position'], ENT_QUOTES, 'UTF-8')?></span>
+                        <h5 class="secondary-color name"><?= htmlspecialchars(($content['firstname'] . $content['lastname']), ENT_QUOTES, 'UTF-8')?></h5>
+                        <span class="position"><?= htmlspecialchars($content['position'], ENT_QUOTES, 'UTF-8')?></span>
                     </div>
                 </div>
                 <?php }?>

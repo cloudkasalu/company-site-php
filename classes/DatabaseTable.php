@@ -27,22 +27,84 @@ class DatabaseTable{
             $stmt = $this->pdo->prepare($args[0]);
             $stmt->execute();
 
-        } 
+        } elseif(count($args) === 2){
+
+        $query = 'SELECT * FROM `' . $this->table . '` WHERE `' . $args[0] . '` =
+        :value';
+        $values = [
+        'value' => $args[1]
+        ];
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($values);
+            
+        }
 
         return $stmt->fetchAll();
     }
 
-    public function find($field, $value) {
-        $query = 'SELECT * FROM `' . $this->table . '` WHERE `' . $field . '` =
-        :value';
+    // public function find($field, $value) {
+    //     $query = 'SELECT * FROM `' . $this->table . '` WHERE `' . $field . '` =
+    //     :value';
+    //     $values = [
+    //     'value' => $value
+    //     ];
+    //     $stmt = $this->pdo->prepare($query);
+    //     $stmt->execute($values);
+
+    //     return $stmt->fetch();
+    // }
+    // public function findJoin($joins,$field, $value) {
+
+    //     $query = 'SELECT * FROM `' . $this->table .  '`  INNER JOIN `'. $joins['table'].'` ON  `'.$this->table.'` `'.$joins['field'].'` WHERE `' . $field . '` =
+    //     :value';
+    //     $values = [
+    //     'value' => $value
+    //     ];
+    //     $stmt = $this->pdo->prepare($query);
+    //     $stmt->execute($values);
+
+
+    //     return $stmt->fetch();
+    // }
+
+    public function findAllnJoin($field, $value, $joins = []) {
+        $query = 'SELECT * FROM `' . $this->table . '`';
+        
+        // Add join statements to the query
+        foreach ($joins as $join) {
+            $query .= ' INNER JOIN `' . $join['table'] . '` ON `' . $this->table . '`.`' . $join['field'] . '` = `' . $join['table'] . '`.`' . $join['value'] . '`';
+        }
+        
+        $query .= ' WHERE `' . $field . '` = :value';
         $values = [
-        'value' => $value
+            'value' => $value
         ];
+        
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
-
+        
         return $stmt->fetch();
     }
+    public function find($field, $value, $joins = []) {
+        $query = 'SELECT * FROM `' . $this->table . '`';
+        
+        // Add join statements to the query
+        foreach ($joins as $join) {
+            $query .= ' INNER JOIN `' . $join['table'] . '` ON `' . $this->table . '`.`' . $join['field'] . '` = `' . $join['table'] . '`.`' . $join['value'] . '`';
+        }
+        
+        $query .= ' WHERE `' . $field . '` = :value';
+        $values = [
+            'value' => $value
+        ];
+        
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute($values);
+        
+        return $stmt->fetch();
+    }
+
+    // SELECT * FROM team LEFT JOIN `users` ON team.id = `users`.`user`;
 
     public function update($values) {
         $query = ' UPDATE `' . $this->table .'` SET ';
