@@ -1,11 +1,8 @@
 <?php
 namespace Classes;
-use Classes\Authentication;
-use Classes\Controllers\AdminController;
-use Classes\Controllers\LoginController;
-use Classes\Controllers\VisitorController;
+
 class EntryPoint{
-    public function __construct(){
+    public function __construct(private \Classes\Website\Router $websiteRouter, private \Classes\Dashboard\DashboardRouter $dashboardRouter){
 
     }
 
@@ -25,71 +22,73 @@ class EntryPoint{
     }
         
 
-    public function run($url){
-
-
+    public function run($uri){
 
         try {
 
 
             include __DIR__ . '/../includes/DatabaseConnection.php';
-            // // include __DIR__ . '/../controllers/AdminController.php';
-            // // include __DIR__ . '/../controllers/VisitorController.php';
-            // // include __DIR__ . '/../includes/autoload.php';
 
-            $auth = new Authentication(new DatabaseTable ($pdo,'team','id'),'email','password');
-
-            $this->checkUri($url);
-
-            $url == ''? $url = 'home' : $url;
-    
-            $url_request = explode('/', $url);
-        
-            $route = array_shift($url_request);
-            $action = null;
-            $controller = null;
-
-            switch ($route) {
-                case 'dashboard':
-
-                    if($auth->isLoggedIn()){
-                        $req = array_shift($url_request);
-                        !$req ? $action = 'home' :  $action = $req . ucfirst(array_shift($url_request)?? '') ;
-                        $controller = new AdminController($pdo,$auth);
-
-                    }else{
-                        header('Location: /login');
-                        exit();
-                    }
-                    break;
-                case 'login':
-                case 'logout':
-                    $action = $route;
-                    $controller = new LoginController($pdo, $auth);
-                    break;
-                default:
-                    $action = $route;
-                    $controller = new VisitorController($pdo);
-
+            if ($uri == '') {
+                $uri = $this->websiteRouter->getDefaultRoute();
             }
 
+            $route = explode('/', $uri);
+            $routeName = array_shift($route);
 
-            if(is_callable([$controller, $action])){
-                    $page = $controller->$action($url_request);
+            if ($routeName !== 'dashboard') {
+                $router = $this->websiteRouter;
+                $action = $routeName;
+                $controller = $router->getController();
+
+                if(is_callable([$controller, $action])){
+                    $page = $controller->$action($route);
+                    $title = $page['title'];
+                    // $variables = $page['variables'] ?? [];
+                    $output = $page['content'];
+                }else{
+                    http_response_code(404);
+
+                    $route = "error";
+                    $title = 'Not found';
+
+                    ob_start();
+                    include __DIR__ . '/../templates/404.html.php';
+                    $output = ob_get_clean();
+            
+                }
+
+            }else{
+
+                $router = $this->dashboardRouter;
+                $controllerName = array_shift($route) ?? $router->getDefaultController();
+                $action = array_shift($route)?? $router->getDefaultRoute();
+                $_SERVER['REQUEST_METHOD'] === 'POST'? $action = $action . "Submit": $action;
+                $controller = $this->dashboardRouter->getController($controllerName);
+
+                $router->checkLogin($controllerName . '/' . $action, $controllerName);
+
+                if(is_callable([$controller, $action])){
+                    $page = $controller->$action($route[0]?? $route);
                     $title = $page['title'];
                     $variables = $page['variables'] ?? [];
                     $output = $this->loadTemplate($page['template'], $variables);
-            }else{
-                http_response_code(404);
+                }else{
+                    http_response_code(404);
 
-                $route = "error";
-                $title = 'Not found';
+                    $route = "error";
+                    $title = 'Not found';
 
-                ob_start();
-                include __DIR__ . '/../templates/404.html.php';
-                $output = ob_get_clean();
-        
+                    ob_start();
+                    include __DIR__ . '/../templates/404.html.php';
+                    $output = ob_get_clean();
+            
+                }
             }
+
+            
+
+
         
             
         } catch (\PDOException $e) {
@@ -98,13 +97,14 @@ class EntryPoint{
             $e->getFile() . ':' . $e->getLine();
         }
 
-        if($route === "dashboard"){
-            include __DIR__ . '/../templates/admin/layout.php';
-        }else if($route === "login" || $route === "error"){
-            include __DIR__ . '/../templates/blank_layout.php';
+        if($routeName == "dashboard"){
+           include __DIR__ .  $this->dashboardRouter->getControllerLayout($controllerName) ?? '/../templates/blank_layout.php';
+
         }else{
-            include __DIR__ . '/../templates/visitor/layout.php';
+           include __DIR__ .  $this->websiteRouter->getControllerLayout() ?? '/../templates/blank_layout.php';
+
         }
+
 
 
     }
